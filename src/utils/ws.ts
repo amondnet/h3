@@ -11,6 +11,16 @@ export type {
 } from "crossws";
 
 /**
+ * A Response type that includes the `crossws` property for WebSocket handlers.
+ *
+ * This is the response type returned by `defineWebSocketHandler` when invoked.
+ * The `crossws` property contains the WebSocket hooks used internally by crossws.
+ */
+export type WebSocketResponse = Response & {
+  crossws: Partial<WebSocketHooks> | Promise<Partial<WebSocketHooks>>;
+};
+
+/**
  * Define WebSocket hooks.
  *
  * @see https://h3.dev/guide/websocket
@@ -32,7 +42,7 @@ export function defineWebSocketHandler(
     | ((
         event: H3Event,
       ) => Partial<WebSocketHooks> | Promise<Partial<WebSocketHooks>>),
-): EventHandler {
+): EventHandler<{}, WebSocketResponse> {
   return defineHandler(function _webSocketHandler(event) {
     const crossws = typeof hooks === "function" ? hooks(event) : hooks;
 
@@ -43,6 +53,6 @@ export function defineWebSocketHandler(
       {
         crossws,
       },
-    );
+    ) as WebSocketResponse;
   });
 }
